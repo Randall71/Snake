@@ -25,7 +25,7 @@ window.onload = function () {
         
         xCoord += 2 
         yCoord += 2
-        ctx.fillStyle = "Yellow";
+        ctx.fillStyle = "yellow";
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillRect(xCoord, yCoord, 100, 50)
         setTimeout(refreshCanvas, delay)
