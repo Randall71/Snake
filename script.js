@@ -2,115 +2,6 @@ var snake
 var apple 
 var snakeGame 
 
-class SnakeGame {
-    
-    constructor(canvasWidth, canvasHeight, blockSize, delay){
-        this.canvas = document.createElement('canvas');
-        this.canvas.width = canvasWidth;
-        this.canvas.height = canvasHeight;
-        this.canvas.style.border = "30px solid gray";
-        this.canvas.style.margin = "50px auto";
-        this.canvas.style.display = "block";
-        this.canvas.style.backgroundColor = "#ddd";
-        document.body.appendChild(this.canvas);
-        this.ctx = this.canvas.getContext('2d')
-        this.blockSize = blockSize
-        this.delay = delay
-        this.widthInBlocks = canvasWidth / blockSize
-        this.heightInBlocks = canvasHeight / blockSize
-        this.score 
-        this.timeout
-    }
-    
-
-    init(snake, apple) {
-        this.snake = snake
-        this.apple = apple
-        this.score = 0
-        clearTimeout(this.timeout)
-        this.refreshCanvas();
-    }
-    refreshCanvas() {
-        this.snake.advance() 
-        if (this.checkCollision()) {
-            this.gameOver()
-            
-        } else {
-            if (this.snake.isEatingApple(this.apple)){
-                this.score++
-                this.snake.ateApple = true 
-                do {
-                    this.apple.SetNewPosition(this.widthInBlocks, this.heightInBlocks)
-                }while(this.apple.isOnSnake(this.snake))
-
-            }
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.drawScore()
-            this.snake.draw(this.ctx, this.blockSize)
-            this.apple.draw(this.ctx, this.blockSize)
-            this.timeout = setTimeout(this.refreshCanvas.bind(this), this.delay)
-
-        }
-       
-    } 
-    checkCollision() {
-        var wallCollision = false 
-        var snakeCollision = false 
-        var head = this.snake.body[0] 
-        var rest = this.snake.body.slice(1)
-        var snakeX = head[0]
-        var snakeY = head[1]
-        var minX = 0
-        var minY = 0
-        var maxX = this.widthInBlocks - 1
-        var maxY = this.heightInBlocks - 1
-        var isNotBetweenHorizontalWalls = snakeX < minX || snakeX > maxX
-        var isNotBetweenVerticalWalls = snakeY < minY || snakeY > maxY
-        
-        if (isNotBetweenHorizontalWalls || isNotBetweenVerticalWalls) {
-            wallCollision = true
-        }
-
-        for (var i = 0; i < rest.length; i++){
-            if (snakeX === rest[i][0] && snakeY === rest[i][1]) {
-                snakeCollision = true
-            }
-        }
-        return wallCollision || snakeCollision
-    }
-
-    gameOver() {
-        this.ctx.save()
-        this.ctx.font = "bold 70px sans-serif"
-        this.ctx.fillStyle = "#000"
-        this.ctx.textAlign = "center"
-        this.ctx.textBaseline = "middle"
-        this.ctx.strokeStyle = "white"
-        this.ctx.lineWidth = 5
-        var centreX = this.canvas.width / 2
-        var centreY = this.canvas.height / 2
-        this.ctx.strokeText('Game Over', centreX, centreY - 180)
-        this.ctx.fillText('Game Over', centreX, centreY - 180)
-        this.ctx.font = "bold 30px sans-serif"
-        this.ctx.strokeText('Appuyer sur la touche espace pour rejouer', centreX, centreY - 120)
-        this.ctx.fillText('Appuyer sur la touche espace pour rejouer',centreX, centreY - 120)
-        this.ctx.restore()
-    }
-
-    drawScore() {
-        this.ctx.save()
-        this.ctx.font = "bold 200px sans-serif"
-        this.ctx.fillStyle = "gray"
-        this.ctx.textAlign = "center"
-        this.ctx.textBaseline = "middle"
-        var centreX = this.canvas.width / 2
-        var centreY = this.canvas.height / 2
-        this.ctx.fillText(this .score.toString(), centreX, centreY)
-        this.ctx.restore()
-    }
-
-}
-
 window.onload = function () {
 
     snakeGame = new SnakeGame(900, 600, 30, 100)
@@ -149,26 +40,90 @@ document.onkeydown = function handleKeyDown(e) {
 }
 
 
+class SnakeGame {
+    
+    constructor(canvasWidth, canvasHeight, blockSize, delay){
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = canvasWidth;
+        this.canvas.height = canvasHeight;
+        this.canvas.style.border = "30px solid gray";
+        this.canvas.style.margin = "50px auto";
+        this.canvas.style.display = "block";
+        this.canvas.style.backgroundColor = "#ddd";
+        document.body.appendChild(this.canvas);
+        this.ctx = this.canvas.getContext('2d')
+        this.blockSize = blockSize
+        this.delay = delay
+        this.widthInBlocks = canvasWidth / blockSize
+        this.heightInBlocks = canvasHeight / blockSize
+        this.score 
+        this.timeout
+    }
+    
 
+    init(snake, apple) {
+        this.snake = snake
+        this.apple = apple
+        this.score = 0
+        clearTimeout(this.timeout)
+        this.refreshCanvas();
+    }
 
-class Snake{
+    refreshCanvas() {
+        this.snake.advance() 
+        if (this.checkCollision()) {
+            Drawing.gameOver(this.ctx, this.canvas.width, this.canvas.height)
+        } else {
+            if (this.snake.isEatingApple(this.apple)){
+                this.score++
+                this.snake.ateApple = true 
+                do {
+                    this.apple.SetNewPosition(this.widthInBlocks, this.heightInBlocks)
+                }while(this.apple.isOnSnake(this.snake))
+            }
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            Drawing.drawScore(this.ctx, this.canvas.width, this.canvas.height, this.score)
+            Drawing.drawSnake(this.ctx, this.blockSize, this.snake)
+            Drawing.drawApple(this.ctx, this.blockSize , this.apple)
+            this.timeout = setTimeout(this.refreshCanvas.bind(this), this.delay)
+        }
+    }
+
+    checkCollision() {
+        var wallCollision = false 
+        var snakeCollision = false 
+        var head = this.snake.body[0] 
+        var rest = this.snake.body.slice(1)
+        var snakeX = head[0]
+        var snakeY = head[1]
+        var minX = 0
+        var minY = 0
+        var maxX = this.widthInBlocks - 1
+        var maxY = this.heightInBlocks - 1
+        var isNotBetweenHorizontalWalls = snakeX < minX || snakeX > maxX
+        var isNotBetweenVerticalWalls = snakeY < minY || snakeY > maxY
+        
+        if (isNotBetweenHorizontalWalls || isNotBetweenVerticalWalls) {
+            wallCollision = true
+        }
+
+        for (var i = 0; i < rest.length; i++){
+            if (snakeX === rest[i][0] && snakeY === rest[i][1]) {
+                snakeCollision = true
+            }
+        }
+        return wallCollision || snakeCollision
+    }
+
+}
+
+class Snake {
     
     constructor(body, direction){
         this.body = body;
         this.direction = direction;
         this.ateApple = false
     }
- 
-    draw(ctx, blockSize) {
-        ctx.save()
-        ctx.fillStyle = "orange";
-        for (var i = 0; i < this.body.length; i++) {
-            var x = this.body[i][0] * blockSize
-            var y = this.body[i][1] * blockSize
-            ctx.fillRect(x , y , blockSize , blockSize)
-        }
-        ctx.restore()
-    };
 
     advance(){
         var nextPosition = this.body[0].slice()
@@ -228,22 +183,10 @@ class Snake{
     }
 }
 
-class Apple{
+class Apple { 
 
     constructor(position){
         this.position = position
-    }
-
-    draw(ctx,blockSize) {
-        ctx.save()
-        ctx.fillStyle = "#33cc23"
-        ctx.beginPath()
-        var radius = blockSize / 2
-        var x = this.position[0] * blockSize + radius
-        var y = this.position[1] * blockSize + radius
-        ctx.arc(x, y, radius, 0, Math.PI * 2, true)
-        ctx.fill()
-        ctx.restore()
     }
 
     SetNewPosition(widthInBlocks,heightInBlocks) {
@@ -263,5 +206,61 @@ class Apple{
     }
 }
 
+class Drawing {
+
+   static drawSnake(ctx , blockSize , snake){
+        ctx.save()
+        ctx.fillStyle = "orange";
+        for (var i = 0; i < snake.body.length; i++) {
+            var x = snake.body[i][0] * blockSize
+            var y = snake.body[i][1] * blockSize
+            ctx.fillRect(x , y , blockSize , blockSize)
+        }
+        ctx.restore()
+    }
+
+    static drawApple(ctx , blockSize, apple){
+        ctx.save()
+        ctx.fillStyle = "#33cc23"
+        ctx.beginPath()
+        var radius = blockSize / 2
+        var x = apple.position[0] * blockSize + radius
+        var y = apple.position[1] * blockSize + radius
+        ctx.arc(x, y, radius, 0, Math.PI * 2, true)
+        ctx.fill()
+        ctx.restore()
+    }
+
+    static drawScore(ctx , canvasWidth , canvasHeight , score){
+        ctx.save()
+        ctx.font = "bold 200px sans-serif"
+        ctx.fillStyle = "gray"
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        var centreX = canvasWidth / 2
+        var centreY = canvasHeight / 2
+        ctx.fillText(score, centreX, centreY)
+        ctx.restore()
+    }
+
+    static gameOver(ctx , canvasWidth , canvasHeight) {
+        ctx.save()
+        ctx.font = "bold 70px sans-serif"
+        ctx.fillStyle = "#000"
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        ctx.strokeStyle = "white"
+        ctx.lineWidth = 5
+        var centreX = canvasWidth / 2
+        var centreY = canvasHeight / 2
+        ctx.strokeText('Game Over', centreX, centreY - 180)
+        ctx.fillText('Game Over', centreX, centreY - 180)
+        ctx.font = "bold 30px sans-serif"
+        ctx.strokeText('Appuyer sur la touche espace pour rejouer', centreX, centreY - 120)
+        ctx.fillText('Appuyer sur la touche espace pour rejouer',centreX, centreY - 120)
+        ctx.restore()
+    }
+
+}
 
       
