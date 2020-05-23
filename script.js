@@ -2,6 +2,115 @@ var snake
 var apple 
 var snakeGame 
 
+class SnakeGame {
+    
+    constructor(canvasWidth, canvasHeight, blockSize, delay){
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = canvasWidth;
+        this.canvas.height = canvasHeight;
+        this.canvas.style.border = "30px solid gray";
+        this.canvas.style.margin = "50px auto";
+        this.canvas.style.display = "block";
+        this.canvas.style.backgroundColor = "#ddd";
+        document.body.appendChild(this.canvas);
+        this.ctx = this.canvas.getContext('2d')
+        this.blockSize = blockSize
+        this.delay = delay
+        this.widthInBlocks = canvasWidth / blockSize
+        this.heightInBlocks = canvasHeight / blockSize
+        this.score 
+        this.timeout
+    }
+    
+
+    init(snake, apple) {
+        this.snake = snake
+        this.apple = apple
+        this.score = 0
+        clearTimeout(this.timeout)
+        this.refreshCanvas();
+    }
+    refreshCanvas() {
+        this.snake.advance() 
+        if (this.checkCollision()) {
+            this.gameOver()
+            
+        } else {
+            if (this.snake.isEatingApple(this.apple)){
+                this.score++
+                this.snake.ateApple = true 
+                do {
+                    this.apple.SetNewPosition(this.widthInBlocks, this.heightInBlocks)
+                }while(this.apple.isOnSnake(this.snake))
+
+            }
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.drawScore()
+            this.snake.draw(this.ctx, this.blockSize)
+            this.apple.draw(this.ctx, this.blockSize)
+            this.timeout = setTimeout(this.refreshCanvas.bind(this), this.delay)
+
+        }
+       
+    } 
+    checkCollision() {
+        var wallCollision = false 
+        var snakeCollision = false 
+        var head = this.snake.body[0] 
+        var rest = this.snake.body.slice(1)
+        var snakeX = head[0]
+        var snakeY = head[1]
+        var minX = 0
+        var minY = 0
+        var maxX = this.widthInBlocks - 1
+        var maxY = this.heightInBlocks - 1
+        var isNotBetweenHorizontalWalls = snakeX < minX || snakeX > maxX
+        var isNotBetweenVerticalWalls = snakeY < minY || snakeY > maxY
+        
+        if (isNotBetweenHorizontalWalls || isNotBetweenVerticalWalls) {
+            wallCollision = true
+        }
+
+        for (var i = 0; i < rest.length; i++){
+            if (snakeX === rest[i][0] && snakeY === rest[i][1]) {
+                snakeCollision = true
+            }
+        }
+        return wallCollision || snakeCollision
+    }
+
+    gameOver() {
+        this.ctx.save()
+        this.ctx.font = "bold 70px sans-serif"
+        this.ctx.fillStyle = "#000"
+        this.ctx.textAlign = "center"
+        this.ctx.textBaseline = "middle"
+        this.ctx.strokeStyle = "white"
+        this.ctx.lineWidth = 5
+        var centreX = this.canvas.width / 2
+        var centreY = this.canvas.height / 2
+        this.ctx.strokeText('Game Over', centreX, centreY - 180)
+        this.ctx.fillText('Game Over', centreX, centreY - 180)
+        this.ctx.font = "bold 30px sans-serif"
+        this.ctx.strokeText('Appuyer sur la touche espace pour rejouer', centreX, centreY - 120)
+        this.ctx.fillText('Appuyer sur la touche espace pour rejouer',centreX, centreY - 120)
+        this.ctx.restore()
+    }
+
+    drawScore() {
+        this.ctx.save()
+        this.ctx.font = "bold 200px sans-serif"
+        this.ctx.fillStyle = "gray"
+        this.ctx.textAlign = "center"
+        this.ctx.textBaseline = "middle"
+        var centreX = this.canvas.width / 2
+        var centreY = this.canvas.height / 2
+        this.ctx.fillText(this .score.toString(), centreX, centreY)
+        this.ctx.restore()
+    }
+
+}
+
 window.onload = function () {
 
     snakeGame = new SnakeGame(900, 600, 30, 100)
@@ -40,131 +149,28 @@ document.onkeydown = function handleKeyDown(e) {
 }
 
 
-function SnakeGame(canvasWidth, canvasHeight, blockSize, delay) {
+
+
+class Snake{
     
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = canvasWidth;
-    this.canvas.height = canvasHeight;
-    this.canvas.style.border = "30px solid gray";
-    this.canvas.style.margin = "50px auto";
-    this.canvas.style.display = "block";
-    this.canvas.style.backgroundColor = "#ddd";
-    document.body.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext('2d')
-    this.blockSize = blockSize
-    this.delay = delay
-    // this.snakee 
-    // this.applee 
-    this.widthInBlocks = canvasWidth / blockSize
-    this.heightInBlocks = canvasHeight / blockSize
-    this.score 
-    var instance = this
-    var timeout
-
-    this.init = function init(snake, apple) {
-        this.snake = snake
-        this.apple = apple
-        this.score = 0
-        clearTimeout(timeout)
-        refreshCanvas();
+    constructor(body, direction){
+        this.body = body;
+        this.direction = direction;
+        this.ateApple = false
     }
-    var refreshCanvas =  function() {
-        instance.snake.advance() 
-        if (instance.checkCollision()) {
-            instance.gameOver()
-            
-        } else {
-            if (instance.snake.isEatingApple(instance.apple)){
-                instance.score++
-                instance.snake.ateApple = true 
-                do {
-                    instance.apple.SetNewPosition(instance.widthInBlocks, instance.heightInBlocks)
-                }while(instance.apple.isOnSnake(instance.snake))
-
-            }
-            instance.ctx.clearRect(0, 0, instance.canvas.width, instance.canvas.height);
-            instance.drawScore()
-            instance.snake.draw(instance.ctx, instance.blockSize)
-            instance.apple.draw(instance.ctx, instance.blockSize)
-            timeout = setTimeout(refreshCanvas, delay)
-
-        }
-       
-    } 
-    this.checkCollision = function () {
-        var wallCollision = false 
-        var snakeCollision = false 
-        var head = this.snake.body[0] 
-        var rest = this.snake.body.slice(1)
-        var snakeX = head[0]
-        var snakeY = head[1]
-        var minX = 0
-        var minY = 0
-        var maxX = this.widthInBlocks - 1
-        var maxY = this.heightInBlocks - 1
-        var isNotBetweenHorizontalWalls = snakeX < minX || snakeX > maxX
-        var isNotBetweenVerticalWalls = snakeY < minY || snakeY > maxY
-        
-        if (isNotBetweenHorizontalWalls || isNotBetweenVerticalWalls) {
-            wallCollision = true
-        }
-
-        for (var i = 0; i < rest.length; i++){
-            if (snakeX === rest[i][0] && snakeY === rest[i][1]) {
-                snakeCollision = true
-            }
-        }
-        return wallCollision || snakeCollision
-    }
-
-    this.gameOver = function() {
-        this.ctx.save()
-        this.ctx.font = "bold 70px sans-serif"
-        this.ctx.fillStyle = "#000"
-        this.ctx.textAlign = "center"
-        this.ctx.textBaseline = "middle"
-        this.ctx.strokeStyle = "white"
-        this.ctx.lineWidth = 5
-        var centreX = this.canvas.width / 2
-        var centreY = this.canvas.height / 2
-        this.ctx.strokeText('Game Over', centreX, centreY - 180)
-        this.ctx.fillText('Game Over', centreX, centreY - 180)
-        this.ctx.font = "bold 30px sans-serif"
-        this.ctx.strokeText('Appuyer sur la touche espace pour rejouer', centreX, centreY - 120)
-        this.ctx.fillText('Appuyer sur la touche espace pour rejouer',centreX, centreY - 120)
-        this.ctx.restore()
-    }
-
-    this.drawScore = function() {
-        this.ctx.save()
-        this.ctx.font = "bold 200px sans-serif"
-        this.ctx.fillStyle = "gray"
-        this.ctx.textAlign = "center"
-        this.ctx.textBaseline = "middle"
-        var centreX = this.canvas.width / 2
-        var centreY = this.canvas.height / 2
-        this.ctx.fillText(this .score.toString(), centreX, centreY)
-        this.ctx.restore()
-    }
-
-}
-
-function Snake(body, direction) {
-    this.body = body;
-    this.direction = direction;
-    this.ateApple = false
-    this.draw = function (ctx, blockSize) {
+ 
+    draw(ctx, blockSize) {
         ctx.save()
         ctx.fillStyle = "orange";
         for (var i = 0; i < this.body.length; i++) {
             var x = this.body[i][0] * blockSize
             var y = this.body[i][1] * blockSize
             ctx.fillRect(x , y , blockSize , blockSize)
-            
         }
         ctx.restore()
     };
-    this.advance = function (){
+
+    advance(){
         var nextPosition = this.body[0].slice()
 
         switch (this.direction) {
@@ -192,7 +198,8 @@ function Snake(body, direction) {
         // console.log(nextPosition)
         
     };
-    this.setDirection = function(newDirection){
+
+    setDirection(newDirection){
         var allowedDirection 
         switch (this.direction) {
             case "left":
@@ -211,7 +218,7 @@ function Snake(body, direction) {
         }
     }
 
-    this.isEatingApple = function(appleToEat){
+    isEatingApple(appleToEat){
         var head = this.body[0]
         if (head[0] === appleToEat.position[0] && head[1] === appleToEat.position[1]) {
             return true 
@@ -221,9 +228,13 @@ function Snake(body, direction) {
     }
 }
 
-function Apple(position){
-    this.position = position
-    this.draw = function (ctx,blockSize) {
+class Apple{
+
+    constructor(position){
+        this.position = position
+    }
+
+    draw(ctx,blockSize) {
         ctx.save()
         ctx.fillStyle = "#33cc23"
         ctx.beginPath()
@@ -234,12 +245,14 @@ function Apple(position){
         ctx.fill()
         ctx.restore()
     }
-    this.SetNewPosition = function (widthInBlocks,heightInBlocks) {
+
+    SetNewPosition(widthInBlocks,heightInBlocks) {
         var newX = Math.round(Math.random() * (widthInBlocks - 1))
         var newY = Math.round(Math.random() * (heightInBlocks - 1))
         this.position = [newX, newY]
     }
-    this.isOnSnake = function (snakeToCheck) {
+    
+    isOnSnake(snakeToCheck) {
         var isOnSnake = false 
         for (var i = 0; i < snakeToCheck.body.length; i++){
             if (this.position[0] === snakeToCheck.body[i][0] && this.position[1] === snakeToCheck.body[i][1]) {
