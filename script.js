@@ -1,3 +1,5 @@
+
+
 var snake 
 var apple 
 var snakeGame 
@@ -262,5 +264,3 @@ class Drawing {
     }
 
 }
-
-      
