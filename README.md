@@ -1,3 +1,10 @@
-# Snake
-Création du jeu du Snake 
-![zozor](https://e7.pngegg.com/pngimages/866/136/png-clipart-snakes-and-ladders-game-android-animated-snake-s-text-video-game.png)
+# Snake Game
+![snake](src/assets/snake.png)
+ intéressant pour perdre le temps comme au bon vieux temps.
+ Mise à jour disponible fréquemment 
+
+## Utilisation
+faites un git clone ou télécharger les fichiers sources et lancez index.html 
+
+Enjoy 
+![image du jeu](src/assets/snake-gif.gif)
