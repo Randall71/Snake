@@ -20,7 +20,6 @@ class SnakeGame {
         this.timeout
     }
     
-
     init(snake, apple) {
         this.snake = snake
         this.apple = apple
