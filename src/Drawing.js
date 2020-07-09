@@ -1,5 +1,3 @@
-
-
 class Drawing {
 
     static drawSnake(ctx , blockSize , snake){
